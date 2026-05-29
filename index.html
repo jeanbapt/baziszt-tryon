@@ -597,45 +597,51 @@
     <div class="product-grid" id="productGrid"></div>
   </section>
 
-  <!-- GENERATE VIKING MODEL -->
+  <!-- LIVE RESULTS SHOWCASE -->
   <section class="demo-result" id="vikingSection">
-    <h2>Step 1 — Generate a Model</h2>
-    <p>First, let's create a model that looks nothing like a typical fashion model — to prove this isn't Photoshop</p>
+    <h2>The Proof — Any Body, Any Piece</h2>
+    <p>We generated a model that looks nothing like a fashion model — then dressed him in Baziszt pieces. Same face, same beard, same build. Only the clothes change.</p>
+
+    <div class="demo-flow" style="margin-bottom: 64px;">
+      <div class="demo-panel">
+        <div class="demo-panel-label">AI-Generated Model</div>
+        <img src="/results/model_1780036804122.jpg" alt="Viking model" style="width:100%;border-radius:8px;box-shadow:0 8px 32px rgba(0,0,0,0.15);">
+      </div>
+      <div class="demo-arrow">&rarr;</div>
+      <div class="demo-panel">
+        <div class="demo-panel-label">+ Chemise Lan</div>
+        <img src="/results/vto_viking_kontext.jpg" alt="Viking in Chemise Lan" style="width:100%;border-radius:8px;box-shadow:0 8px 32px rgba(0,0,0,0.15);">
+      </div>
+      <div class="demo-arrow">&rarr;</div>
+      <div class="demo-panel">
+        <div class="demo-panel-label">+ Chawachi Jacket</div>
+        <img src="/results/vto_viking_chawachi_v2.jpg" alt="Viking in Chawachi Jacket" style="width:100%;border-radius:8px;box-shadow:0 8px 32px rgba(0,0,0,0.15);">
+      </div>
+    </div>
+
     <div style="text-align:center; margin-bottom: 32px;">
       <button class="generate-btn" id="generateVikingBtn" onclick="generateViking()" style="max-width:400px;">
-        Generate the Viking Model
+        Generate a New Model
       </button>
       <div id="vikingStatus" style="margin-top:12px; font-size:13px; color:#888;"></div>
     </div>
-    <div class="demo-flow">
-      <div class="demo-panel">
-        <div class="demo-panel-label">AI-Generated Model</div>
-        <div class="placeholder" id="vikingSlot">
-          <div class="placeholder-icon">&#129504;</div>
-          <div class="placeholder-text">Viking model will appear here</div>
-        </div>
-      </div>
-    </div>
   </section>
 
-  <!-- LIVE DEMO RESULT -->
+  <!-- INTERACTIVE TRY-ON -->
   <section class="demo-result">
-    <h2>Step 2 — Virtual Try-On</h2>
-    <p>Now dress the Viking in Baziszt pieces — the AI preserves his face, beard, body, and pose exactly</p>
+    <h2>Try It Yourself</h2>
+    <p>Select any garment above — the AI dresses the generated model in real time</p>
     <div class="demo-flow">
       <div class="demo-panel">
         <div class="demo-panel-label">Person</div>
-        <div class="placeholder" id="personSlot">
-          <div class="placeholder-icon">&#128100;</div>
-          <div class="placeholder-text">Model photo</div>
-        </div>
+        <div id="personSlot"><img src="/results/model_1780036804122.jpg" alt="Viking model" style="width:100%;height:100%;object-fit:cover;border-radius:8px;"></div>
       </div>
       <div class="demo-arrow">+</div>
       <div class="demo-panel">
         <div class="demo-panel-label">Baziszt Garment</div>
         <div class="placeholder" id="garmentSlot">
           <div class="placeholder-icon">&#128085;</div>
-          <div class="placeholder-text">Selected piece</div>
+          <div class="placeholder-text">Select a piece above</div>
         </div>
       </div>
       <div class="demo-arrow">=</div>
@@ -834,7 +840,7 @@
           body: JSON.stringify({
             person_url: currentModelUrl,
             garment_url: p.img,
-            prompt: `The person of image 1, maintaining exactly their face and pose, wearing the ${p.desc} of image 2.`,
+            prompt: `Dress the person from image 1 in the garment from image 2. Keep exactly their face, hair, build, and pose — only change the clothing. The garment is: ${p.desc}. Match image 2 precisely in color, fabric, pattern, and construction details.`,
           }),
         });
         const data = await resp.json();

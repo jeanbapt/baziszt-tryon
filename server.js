@@ -5,7 +5,7 @@ import { fileURLToPath } from "node:url";
 
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
 const PORT = process.env.PORT || 8090;
-const BFL_API = "https://api.us1.bfl.ai/v1";
+const BFL_API = "https://api.bfl.ai/v1";
 const API_KEY = process.env.BFL_API_KEY;
 
 if (!API_KEY) {
@@ -30,7 +30,11 @@ const MIME = {
 async function bflRequest(endpoint, payload) {
   const res = await fetch(`${BFL_API}/${endpoint}`, {
     method: "POST",
-    headers: { "Content-Type": "application/json", "X-Key": API_KEY },
+    headers: {
+      "Content-Type": "application/json",
+      "X-Key": API_KEY,
+      "accept": "application/json",
+    },
     body: JSON.stringify(payload),
   });
   if (!res.ok) {
@@ -40,15 +44,15 @@ async function bflRequest(endpoint, payload) {
   return res.json();
 }
 
-async function bflPoll(requestId, maxWait = 180) {
+async function bflPoll(pollingUrl, maxWait = 300) {
   const start = Date.now();
   while (Date.now() - start < maxWait * 1000) {
-    const res = await fetch(`${BFL_API}/get_result?id=${requestId}`, {
-      headers: { "X-Key": API_KEY },
+    const res = await fetch(pollingUrl, {
+      headers: { "X-Key": API_KEY, "accept": "application/json" },
     });
     const result = await res.json();
     if (result.status === "Ready") return result;
-    if (["Error", "Content Moderated", "Request Moderated"].includes(result.status)) return result;
+    if (["Error", "Content Moderated", "Request Moderated", "Failed"].includes(result.status)) return result;
     await new Promise((r) => setTimeout(r, 1500));
   }
   return { status: "Timeout" };
@@ -83,14 +87,15 @@ async function handleGenerate(req, res) {
   const body = await readBody(req);
   console.log(`[generate] ${body.prompt?.slice(0, 80)}...`);
   try {
-    const resp = await bflRequest("flux-pro-1.1", {
+    const resp = await bflRequest("flux-2-klein-9b", {
       prompt: body.prompt,
       width: body.width || 832,
       height: body.height || 1216,
-      safety_tolerance: 6,
+      safety_tolerance: 2,
+      output_format: "jpeg",
     });
-    console.log(`[generate] submitted: ${resp.id}`);
-    const result = await bflPoll(resp.id);
+    console.log(`[generate] submitted: ${resp.id}, polling: ${resp.polling_url}`);
+    const result = await bflPoll(resp.polling_url);
     console.log(`[generate] status: ${result.status}`);
     if (result.status === "Ready") {
       const imageUrl = result.result.sample;
@@ -109,14 +114,17 @@ async function handleVto(req, res) {
   const body = await readBody(req);
   console.log(`[vto] person=${body.person_url?.slice(0, 60)}...`);
   try {
-    const resp = await bflRequest("flux-kontext-max/virtual-try-on", {
-      person_image_url: body.person_url,
-      garment_image_url: body.garment_url,
+    const resp = await bflRequest("flux-kontext-max", {
+      input_images: [
+        { url: body.person_url },
+        { url: body.garment_url },
+      ],
       prompt: body.prompt,
-      steps: 4,
+      aspect_ratio: "3:4",
+      output_format: "jpeg",
     });
-    console.log(`[vto] submitted: ${resp.id}`);
-    const result = await bflPoll(resp.id, 180);
+    console.log(`[vto] submitted: ${resp.id}, polling: ${resp.polling_url}`);
+    const result = await bflPoll(resp.polling_url, 180);
     console.log(`[vto] status: ${result.status}`);
     if (result.status === "Ready") {
       const imageUrl = result.result.sample;
