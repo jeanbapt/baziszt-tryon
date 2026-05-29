@@ -559,101 +559,92 @@
     </div>
   </section>
 
-  <!-- HOW IT WORKS -->
-  <section class="how-it-works">
-    <h2>How It Works</h2>
-    <div class="steps">
-      <div class="step">
-        <div class="step-number">1</div>
-        <h3>Upload Your Photo</h3>
-        <p>Take or upload a front-facing photo. Our AI preserves your face, pose, and body exactly as you are.</p>
+  <!-- STEP 1: WHO ARE YOU BUILDING FOR? -->
+  <section class="demo-result" id="step1">
+    <div style="max-width:1200px; margin: 0 auto;">
+      <div style="display:flex; align-items:baseline; gap:16px; margin-bottom: 8px;">
+        <span style="font-family:'Cormorant Garamond',serif; font-size:48px; font-weight:300; color:var(--gold);">01</span>
+        <h2 style="margin:0;">Who are you building for?</h2>
       </div>
-      <div class="step-arrow">&rarr;</div>
-      <div class="step">
-        <div class="step-number">2</div>
-        <h3>Choose a Piece</h3>
-        <p>Browse the Baziszt catalog and select any shirt, jacket, or knitwear piece that catches your eye.</p>
-      </div>
-      <div class="step-arrow">&rarr;</div>
-      <div class="step">
-        <div class="step-number">3</div>
-        <h3>See Yourself</h3>
-        <p>In seconds, see a photorealistic image of yourself wearing the garment. Every embroidery detail preserved.</p>
-      </div>
-    </div>
-  </section>
+      <p style="margin-bottom: 32px;">Every Baziszt customer is unique. Pick a body type &mdash; or describe your own.</p>
 
-  <!-- CATALOG -->
-  <section class="catalog">
-    <div class="catalog-header">
-      <h2>Try the Collection</h2>
-      <p>Hover over any piece and click "Try On" to start</p>
-    </div>
-    <div class="catalog-tabs">
-      <button class="catalog-tab active" onclick="filterCatalog('all')">All</button>
-      <button class="catalog-tab" onclick="filterCatalog('shirts')">Shirts</button>
-      <button class="catalog-tab" onclick="filterCatalog('jackets')">Jackets</button>
-    </div>
-    <div class="product-grid" id="productGrid"></div>
-  </section>
-
-  <!-- LIVE RESULTS SHOWCASE -->
-  <section class="demo-result" id="vikingSection">
-    <h2>The Proof — Any Body, Any Piece</h2>
-    <p>We generated a model that looks nothing like a fashion model — then dressed him in Baziszt pieces. Same face, same beard, same build. Only the clothes change.</p>
-
-    <div class="demo-flow" style="margin-bottom: 64px;">
-      <div class="demo-panel">
-        <div class="demo-panel-label">AI-Generated Model</div>
-        <img src="/results/model_1780036804122.jpg" alt="Viking model" style="width:100%;border-radius:8px;box-shadow:0 8px 32px rgba(0,0,0,0.15);">
+      <div style="display:grid; grid-template-columns: repeat(6, 1fr); gap:14px; margin-bottom:32px;" id="presetModels">
+        <!-- Presets injected by JS -->
       </div>
-      <div class="demo-arrow">&rarr;</div>
-      <div class="demo-panel">
-        <div class="demo-panel-label">+ Chemise Lan</div>
-        <img src="/results/vto_viking_kontext.jpg" alt="Viking in Chemise Lan" style="width:100%;border-radius:8px;box-shadow:0 8px 32px rgba(0,0,0,0.15);">
-      </div>
-      <div class="demo-arrow">&rarr;</div>
-      <div class="demo-panel">
-        <div class="demo-panel-label">+ Chawachi Jacket</div>
-        <img src="/results/vto_viking_chawachi_v2.jpg" alt="Viking in Chawachi Jacket" style="width:100%;border-radius:8px;box-shadow:0 8px 32px rgba(0,0,0,0.15);">
-      </div>
-    </div>
 
-    <div style="text-align:center; margin-bottom: 32px;">
-      <button class="generate-btn" id="generateVikingBtn" onclick="generateViking()" style="max-width:400px;">
-        Generate a New Model
-      </button>
-      <div id="vikingStatus" style="margin-top:12px; font-size:13px; color:#888;"></div>
-    </div>
-  </section>
-
-  <!-- INTERACTIVE TRY-ON -->
-  <section class="demo-result">
-    <h2>Try It Yourself</h2>
-    <p>Select any garment above — the AI dresses the generated model in real time</p>
-    <div class="demo-flow">
-      <div class="demo-panel">
-        <div class="demo-panel-label">Person</div>
-        <div id="personSlot"><img src="/results/model_1780036804122.jpg" alt="Viking model" style="width:100%;height:100%;object-fit:cover;border-radius:8px;"></div>
-      </div>
-      <div class="demo-arrow">+</div>
-      <div class="demo-panel">
-        <div class="demo-panel-label">Baziszt Garment</div>
-        <div class="placeholder" id="garmentSlot">
-          <div class="placeholder-icon">&#128085;</div>
-          <div class="placeholder-text">Select a piece above</div>
+      <details style="max-width:720px; margin: 0 auto;">
+        <summary style="cursor:pointer; font-size:11px; letter-spacing:2px; text-transform:uppercase; font-weight:600; color:var(--maroon); text-align:center; padding:12px;">Or describe a custom model &#9662;</summary>
+        <div style="margin-top:16px;">
+          <textarea id="vikingPrompt" rows="3" style="width:100%; padding:14px 16px; border:1px solid var(--sand); border-radius:6px; font-family:'Inter',sans-serif; font-size:14px; line-height:1.5; color:var(--charcoal); background:var(--white); resize:vertical; box-sizing:border-box;">Professional lifestyle portrait of a distinguished Viking-like man in his 50s with long flowing silver hair and a full thick beard, heavyset barrel-chested build, wearing a plain white t-shirt, standing in a sunlit courtyard, warm golden hour lighting, genuine confident expression, shot from waist up, editorial portrait photography, shallow depth of field</textarea>
+          <div style="text-align:center; margin-top: 16px;">
+            <button class="generate-btn" id="generateVikingBtn" onclick="generateViking()" style="max-width:400px;">Generate Custom Model</button>
+            <div id="vikingStatus" style="margin-top:12px; font-size:13px; color:#888;"></div>
+          </div>
         </div>
-      </div>
-      <div class="demo-arrow">=</div>
-      <div class="demo-panel">
-        <div class="demo-panel-label">Try-On Result</div>
-        <div class="placeholder" id="resultSlot">
-          <div class="placeholder-icon">&#10024;</div>
-          <div class="placeholder-text">AI-generated result</div>
+      </details>
+    </div>
+  </section>
+
+  <!-- STEP 2: PICK A GARMENT + STEP 3: RESULT (combined, side-by-side) -->
+  <section class="demo-result" style="background:var(--white);">
+    <div style="max-width:1300px; margin: 0 auto;">
+      <div style="display:grid; grid-template-columns: 1.1fr 1fr; gap:48px; align-items:start;">
+
+        <!-- LEFT: Catalog -->
+        <div>
+          <div style="display:flex; align-items:baseline; gap:16px; margin-bottom: 8px;">
+            <span style="font-family:'Cormorant Garamond',serif; font-size:48px; font-weight:300; color:var(--gold);">02</span>
+            <h2 style="margin:0; font-size:36px;">Pick a Garment</h2>
+          </div>
+          <p style="margin-bottom: 24px;">Click any piece &mdash; the AI dresses your model in seconds.</p>
+
+          <div class="catalog-tabs" style="justify-content:flex-start; margin-bottom:24px;">
+            <button class="catalog-tab active" onclick="filterCatalog('all', event)">All</button>
+            <button class="catalog-tab" onclick="filterCatalog('shirts', event)">Shirts</button>
+            <button class="catalog-tab" onclick="filterCatalog('jackets', event)">Jackets</button>
+          </div>
+          <div class="product-grid" id="productGrid" style="grid-template-columns: repeat(3, 1fr); gap:16px;"></div>
         </div>
+
+        <!-- RIGHT: Result (sticky on desktop) -->
+        <div style="position:sticky; top:88px;">
+          <div style="display:flex; align-items:baseline; gap:16px; margin-bottom: 8px;">
+            <span style="font-family:'Cormorant Garamond',serif; font-size:48px; font-weight:300; color:var(--gold);">03</span>
+            <h2 style="margin:0; font-size:36px;">Your Look</h2>
+          </div>
+          <p style="margin-bottom: 24px;">Same identity. Real garments. Real fit.</p>
+
+          <div class="demo-panel" style="max-width:none;">
+            <div class="demo-panel-label" style="display:flex; justify-content:space-between; align-items:center;">
+              <span>Result</span>
+              <span id="resultBadge" style="display:none; background:var(--gold); color:var(--white); font-size:9px; padding:3px 8px; border-radius:10px; letter-spacing:1px;">Live</span>
+            </div>
+            <div id="resultSlot" class="placeholder" style="min-height:480px; aspect-ratio:3/4;">
+              <div class="placeholder-icon">&#10024;</div>
+              <div class="placeholder-text">Pick a garment to start</div>
+            </div>
+          </div>
+
+          <!-- Mini person + garment thumbs -->
+          <div style="display:flex; gap:12px; margin-top:16px; font-size:11px; letter-spacing:1px; text-transform:uppercase; color:#888;">
+            <div style="flex:1; text-align:center;">
+              <div id="personThumb" style="width:100%; aspect-ratio:1; background:var(--sand); border-radius:6px; overflow:hidden; margin-bottom:6px;"></div>
+              Person
+            </div>
+            <div style="display:flex; align-items:center; padding-bottom:24px; color:var(--gold);">+</div>
+            <div style="flex:1; text-align:center;">
+              <div id="garmentSlot" class="placeholder" style="width:100%; aspect-ratio:1; border-radius:6px; margin-bottom:6px; border:1px dashed #ddd; background:var(--sand);">
+                <div class="placeholder-icon" style="font-size:24px;">&#128085;</div>
+              </div>
+              Garment
+            </div>
+          </div>
+
+          <div id="vtoStatus" style="margin-top:16px; font-size:13px; color:#888; text-align:center;"></div>
+        </div>
+
       </div>
     </div>
-    <div id="vtoStatus" style="text-align:center; margin-top:16px; font-size:13px; color:#888;"></div>
   </section>
 
   <!-- STATS -->
@@ -684,20 +675,6 @@
   </footer>
 
   <!-- MODAL -->
-  <div class="modal-backdrop" id="modal">
-    <div class="modal">
-      <button class="modal-close" onclick="closeModal()">&times;</button>
-      <h3>Try On This Piece</h3>
-      <p>Upload your photo to see yourself wearing this garment</p>
-      <div class="modal-garment" id="modalGarment"></div>
-      <div class="upload-zone" onclick="document.getElementById('photoInput').click()">
-        <p>&#128247; Click to upload your photo</p>
-        <input type="file" id="photoInput" accept="image/*" style="display:none">
-      </div>
-      <button class="generate-btn" onclick="generateTryOn()">Generate Try-On</button>
-    </div>
-  </div>
-
   <script>
     const products = [
       { name: "Chemise Lan", price: "485", category: "shirts", img: "https://baziszt.com/cdn/shop/files/BZSS26SR06096-1.jpg", desc: "beige cotton shirt with delicate pink and green floral rose embroidery along the front panels" },
@@ -714,22 +691,74 @@
       { name: "Scarlet Jacket", price: "790", category: "jackets", img: "https://baziszt.com/cdn/shop/files/SCARLET_JACKET.jpg", desc: "black suede western-style jacket with contrast white stitching" },
     ];
 
+    // ─── Stylist fitting table: shirt name -> recommended jacket name ───
+    const fittingPairs = {
+      "Chemise Lan": "Chawachi Jacket",
+      "Chemise Riot Velours": "Chal Jacket",
+      "Chemise Corniche Ecru": "Frost Jacket",
+      "Chemise Provence": "Aurum Jacket",
+      "Chemise Bawa": "Frichin Jacket",
+      "Chemise Sweden": "Scarlet Jacket",
+      "Chawachi Jacket": "Chemise Lan",
+      "Frichin Jacket": "Chemise Bawa",
+      "Chal Jacket": "Chemise Riot Velours",
+      "Frost Jacket": "Chemise Corniche Ecru",
+      "Aurum Jacket": "Chemise Provence",
+      "Scarlet Jacket": "Chemise Sweden",
+    };
+    const findProduct = name => products.find(p => p.name === name);
+
     let currentModelUrl = null;
     let selectedGarmentIdx = null;
 
     // ─── Product grid ───
+    // ─── Preset models — diverse cast ───
+    const presetModels = [
+      { name: "The Viking",        tag: "50s / Stocky",   img: "/results/model_1780036804122.jpg" },
+      { name: "Slender Med.",      tag: "30s / Lean",     img: "/results/preset_slender_med.jpg" },
+      { name: "Afro Rasta",        tag: "40s / Dreads",   img: "/results/preset_afro_rasta.jpg" },
+      { name: "Distinguished",     tag: "70s / Elder",    img: "/results/preset_old_man.jpg" },
+      { name: "Everyman",          tag: "40s / Medium",   img: "/results/preset_medium_age.jpg" },
+      { name: "Young",             tag: "20s / Slim",     img: "/results/preset_young.jpg" },
+    ];
+
+    function renderPresets() {
+      const wrap = document.getElementById('presetModels');
+      wrap.innerHTML = presetModels.map((m, i) => `
+        <div class="preset-card" onclick="selectPreset(${i})" data-idx="${i}" style="cursor:pointer; border-radius:8px; overflow:hidden; box-shadow:0 4px 16px rgba(0,0,0,0.08); border:3px solid transparent; transition:all 0.2s; background:#fff;">
+          <div style="aspect-ratio:3/4; overflow:hidden; background:var(--sand);">
+            <img src="${m.img}" alt="${m.name}" onerror="this.style.display='none';this.parentElement.innerHTML='<div style=\\'display:flex;align-items:center;justify-content:center;height:100%;color:#999;font-size:11px;\\'>Generating&hellip;</div>'" style="width:100%; height:100%; object-fit:cover; display:block;">
+          </div>
+          <div style="padding:10px 12px; text-align:center;">
+            <div style="font-size:11px; letter-spacing:1.5px; text-transform:uppercase; font-weight:600; margin-bottom:2px;">${m.name}</div>
+            ${m.tag ? `<div style="font-size:10px; color:#888; letter-spacing:0.5px;">${m.tag}</div>` : ''}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function selectPreset(idx) {
+      const m = presetModels[idx];
+      currentModelUrl = m.img;
+      document.querySelectorAll('.preset-card').forEach((el, i) => {
+        el.style.borderColor = i === idx ? 'var(--maroon)' : 'transparent';
+      });
+      const thumb = document.getElementById('personThumb');
+      if (thumb) thumb.innerHTML = `<img src="${m.img}" alt="${m.name}" style="width:100%; height:100%; object-fit:cover;">`;
+    }
+
     function renderProducts(filter = 'all') {
       const grid = document.getElementById('productGrid');
       grid.innerHTML = '';
       const filtered = filter === 'all' ? products : products.filter(p => p.category === filter);
-      filtered.forEach((p, i) => {
+      filtered.forEach((p) => {
         const realIdx = products.indexOf(p);
         grid.innerHTML += `
-          <div class="product-card" data-index="${realIdx}">
+          <div class="product-card" data-index="${realIdx}" onclick="tryGarment(${realIdx})">
             <div class="product-img-wrap">
               <img src="${p.img}" alt="${p.name}" loading="lazy">
               <div class="try-on-overlay">
-                <button class="try-on-btn" onclick="openModal(${realIdx})">Try On</button>
+                <button class="try-on-btn">Try On</button>
               </div>
             </div>
             <div class="product-info">
@@ -740,10 +769,28 @@
       });
     }
 
-    function filterCatalog(cat) {
+    function filterCatalog(cat, ev) {
       document.querySelectorAll('.catalog-tab').forEach(t => t.classList.remove('active'));
-      event.target.classList.add('active');
+      (ev?.target || ev?.currentTarget || event.target).classList.add('active');
       renderProducts(cat);
+    }
+
+    // ─── Polling helper ───
+    async function pollJob(jobId, onProgress) {
+      for (let i = 0; i < 240; i++) {
+        await new Promise(r => setTimeout(r, 2000));
+        let r;
+        try {
+          r = await fetch(`/api/job?id=${jobId}`);
+        } catch (e) {
+          continue; // network blip, retry
+        }
+        const d = await r.json();
+        if (d.status === 'ready') return d;
+        if (d.status === 'failed') return d;
+        if (onProgress) onProgress(i);
+      }
+      return { status: 'timeout' };
     }
 
     // ─── Viking model generation ───
@@ -752,119 +799,264 @@
       const status = document.getElementById('vikingStatus');
       btn.disabled = true;
       btn.textContent = 'Generating...';
-      status.textContent = 'Sending request to FLUX API — this takes ~15-30 seconds...';
+      status.textContent = 'Submitting to FLUX API...';
+
+      const promptText = document.getElementById('vikingPrompt').value.trim();
+      if (!promptText) {
+        status.innerHTML = '<span style="color:#c00;">Enter a prompt above</span>';
+        btn.disabled = false;
+        btn.textContent = 'Generate a New Model';
+        return;
+      }
 
       try {
-        const resp = await fetch('/api/generate', {
+        const submitResp = await fetch('/api/generate', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            prompt: "Professional lifestyle portrait of a distinguished Viking-like man in his 50s with long flowing silver hair and a full thick beard, heavyset barrel-chested build, wearing a plain white t-shirt, standing in a sunlit courtyard, warm golden hour lighting, genuine confident expression, shot from waist up, editorial portrait photography, shallow depth of field",
+            prompt: promptText,
             width: 832,
             height: 1216,
           }),
         });
-        const data = await resp.json();
+        const { job_id } = await submitResp.json();
+        status.textContent = 'Generating model... (this takes 30-60s)';
+
+        const data = await pollJob(job_id, i => {
+          status.textContent = `Generating model... ${i * 2}s elapsed`;
+        });
 
         if (data.ok) {
-          currentModelUrl = data.image_url;
-          const slot = document.getElementById('vikingSlot');
-          slot.innerHTML = `<img src="${data.local_path}" alt="Viking model" style="width:100%;border-radius:8px;box-shadow:0 8px 32px rgba(0,0,0,0.15);">`;
-          // Also update person slot in the VTO section
-          document.getElementById('personSlot').innerHTML = `<img src="${data.local_path}" alt="Viking model" style="width:100%;height:100%;object-fit:cover;border-radius:8px;">`;
-          status.innerHTML = '<span style="color:#2a7d2a;">Model generated successfully!</span> Now scroll down and try on a garment.';
-          btn.textContent = 'Regenerate Model';
+          // Prefer local_path: never expires and the server can re-read it.
+          currentModelUrl = data.local_path || data.image_url;
+          // Add the freshly generated model as a new preset at the front
+          presetModels.unshift({ name: "Just generated", img: data.local_path });
+          if (presetModels.length > 6) presetModels.pop();
+          renderPresets();
+          selectPreset(0);
+          status.innerHTML = '<span style="color:#2a7d2a;">Model ready &mdash; now pick a garment below.</span>';
+          btn.textContent = 'Generate Another';
+          document.getElementById('productGrid').scrollIntoView({ behavior:'smooth', block:'start' });
         } else {
-          status.innerHTML = `<span style="color:#c00;">Generation failed: ${data.status || data.error}</span>`;
+          status.innerHTML = `<span style="color:#c00;">Failed: ${data.detail?.status || data.error || data.status}</span>`;
           btn.textContent = 'Retry';
         }
       } catch (e) {
-        status.innerHTML = `<span style="color:#c00;">Server error — make sure server.py is running</span>`;
+        status.innerHTML = `<span style="color:#c00;">Server error: ${e.message}</span>`;
         btn.textContent = 'Retry';
       }
       btn.disabled = false;
     }
 
-    // ─── Try-on modal ───
-    function openModal(idx) {
-      selectedGarmentIdx = idx;
-      const p = products[idx];
-      document.getElementById('modalGarment').innerHTML = `
-        <img src="${p.img}" alt="${p.name}">
-        <div class="modal-garment-info">
-          <h5>${p.name}</h5>
-          <span>${p.price} &euro;</span>
-        </div>`;
-
-      const uploadZone = document.querySelector('.upload-zone');
-      if (currentModelUrl) {
-        uploadZone.innerHTML = `<p style="color:#2a7d2a;">&#10003; Using the generated Viking model</p>`;
-      } else {
-        uploadZone.innerHTML = `<p>&#128247; Click to upload your photo</p><input type="file" id="photoInput" accept="image/*" style="display:none">`;
-        uploadZone.onclick = () => document.getElementById('photoInput')?.click();
-      }
-
-      document.getElementById('modal').classList.add('open');
-    }
-
-    function closeModal() {
-      document.getElementById('modal').classList.remove('open');
-    }
-
-    async function generateTryOn() {
+    // ─── Click any garment card → instant try-on (no modal) ───
+    async function tryGarment(idx) {
       if (!currentModelUrl) {
-        alert('Generate the Viking model first (scroll up), or upload a photo.');
+        const status = document.getElementById('vikingStatus') || document.getElementById('vtoStatus');
+        if (status) status.innerHTML = '<span style="color:#c00;">Pick a model first (Step 1 above)</span>';
+        document.getElementById('step1').scrollIntoView({ behavior:'smooth', block:'start' });
         return;
       }
-      const p = products[selectedGarmentIdx];
-      closeModal();
+      selectedGarmentIdx = idx;
+      const p = products[idx];
 
-      // Update the demo flow UI
-      document.getElementById('garmentSlot').innerHTML = `<img src="${p.img}" alt="${p.name}" style="width:100%;height:100%;object-fit:cover;border-radius:8px;">`;
+      document.getElementById('garmentSlot').innerHTML = `<img src="${p.img}" alt="${p.name}" style="width:100%;height:100%;object-fit:cover;border-radius:6px;">`;
       document.getElementById('resultSlot').innerHTML = `
         <div style="display:flex;align-items:center;justify-content:center;height:100%;flex-direction:column;gap:12px;">
           <div class="spinner"></div>
-          <div style="font-size:13px;color:#888;">Generating try-on...</div>
+          <div style="font-size:13px;color:#888;">Generating ${p.name}...</div>
         </div>`;
+      document.getElementById('resultBadge').style.display = 'inline-block';
 
       const vtoStatus = document.getElementById('vtoStatus');
-      vtoStatus.textContent = `Dressing the Viking in ${p.name} — this takes ~30-60 seconds...`;
+      vtoStatus.textContent = `Submitting ${p.name} try-on...`;
 
-      // Scroll to the result area
-      document.getElementById('resultSlot').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      // Remove any prior pairing panel
+      document.getElementById('pairingPanel')?.remove();
 
       try {
-        const resp = await fetch('/api/vto', {
+        const submitResp = await fetch('/api/vto', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             person_url: currentModelUrl,
             garment_url: p.img,
-            prompt: `Dress the person from image 1 in the garment from image 2. Keep exactly their face, hair, build, and pose — only change the clothing. The garment is: ${p.desc}. Match image 2 precisely in color, fabric, pattern, and construction details.`,
           }),
         });
-        const data = await resp.json();
+        const { job_id } = await submitResp.json();
+
+        const data = await pollJob(job_id, i => {
+          vtoStatus.textContent = `Generating ${p.name}... ${i * 2}s elapsed`;
+        });
 
         if (data.ok) {
-          document.getElementById('resultSlot').innerHTML = `<img src="${data.local_path}" alt="Try-on result" style="width:100%;border-radius:8px;box-shadow:0 8px 32px rgba(0,0,0,0.15);">`;
-          vtoStatus.innerHTML = `<span style="color:#2a7d2a;">Try-on complete!</span> The Viking is now wearing the <strong>${p.name}</strong>.`;
+          document.getElementById('resultSlot').innerHTML = `<img src="${data.local_path}" alt="Try-on result" style="width:100%; height:auto; object-fit:contain; border-radius:8px; box-shadow:0 8px 32px rgba(0,0,0,0.15);">`;
+          vtoStatus.innerHTML = `<span style="color:#2a7d2a;">&#10003; Wearing <strong>${p.name}</strong></span>`;
+          showPairingSuggestion(p, data.local_path);
         } else {
           document.getElementById('resultSlot').innerHTML = `
             <div class="placeholder">
-              <div class="placeholder-text" style="color:#c00;">Failed: ${data.status || data.error}</div>
+              <div class="placeholder-text" style="color:#c00;">Failed: ${data.detail?.status || data.error || data.status}</div>
             </div>`;
-          vtoStatus.innerHTML = `<span style="color:#c00;">Try-on failed — ${data.status || data.error}</span>`;
+          vtoStatus.innerHTML = `<span style="color:#c00;">Try-on failed</span>`;
         }
       } catch (e) {
         document.getElementById('resultSlot').innerHTML = `
           <div class="placeholder">
             <div class="placeholder-text" style="color:#c00;">Server error</div>
           </div>`;
-        vtoStatus.innerHTML = '<span style="color:#c00;">Server error — make sure server.py is running</span>';
+        vtoStatus.innerHTML = `<span style="color:#c00;">Server error: ${e.message}</span>`;
       }
     }
 
+    // ─── Pairing suggestion + bundle discount ───
+    function showPairingSuggestion(garmentJustTried, resultImageUrl) {
+      const partnerName = fittingPairs[garmentJustTried.name];
+      if (!partnerName) return;
+      const partner = findProduct(partnerName);
+      if (!partner) return;
+
+      // Encode state for the addPairing button
+      window._pairingState = { base: garmentJustTried, partner, resultImageUrl };
+
+      let panel = document.getElementById('pairingPanel');
+      if (!panel) {
+        panel = document.createElement('div');
+        panel.id = 'pairingPanel';
+        panel.style.cssText = 'margin-top:24px;padding:20px;background:var(--cream);border:1px solid var(--sand);border-radius:10px;';
+        // Append inside the right column, after vtoStatus
+        document.getElementById('vtoStatus').after(panel);
+      }
+      const bundlePrice = Number(garmentJustTried.price) + Number(partner.price);
+      const discount = Math.round(bundlePrice * 0.10);
+      const finalPrice = bundlePrice - discount;
+      panel.innerHTML = `
+        <div style="font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:10px;font-weight:600;">Add one piece</div>
+        <div style="display:flex;align-items:center;gap:14px;">
+          <img src="${partner.img}" alt="${partner.name}" style="width:72px;height:90px;object-fit:cover;border-radius:6px;flex-shrink:0;">
+          <div style="flex:1;min-width:0;">
+            <div style="font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:300;line-height:1.2;margin-bottom:4px;">${partner.name}</div>
+            <div style="font-size:12px;color:#666;line-height:1.4;margin-bottom:10px;">The stylist's pick to complete this look.</div>
+            <button class="generate-btn" onclick="addPairing()" style="padding:10px 20px;max-width:none;width:auto;font-size:11px;">+ Add the ${partner.category === 'jackets' ? 'jacket' : 'shirt'}</button>
+          </div>
+        </div>
+        <div id="bundleBanner" style="display:none;margin-top:16px;padding:14px;background:linear-gradient(135deg, var(--maroon), #5a1a1a);color:var(--white);border-radius:8px;">
+          <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:6px;font-weight:600;text-align:center;">&#9201; Book in the next 24h &mdash; save 10%</div>
+          <div style="font-size:13px;line-height:1.5;text-align:center;">
+            <strong>${garmentJustTried.name}</strong> + <strong>${partner.name}</strong><br>
+            <span style="text-decoration:line-through;opacity:0.5;">${bundlePrice} &euro;</span>
+            &nbsp;&rarr;&nbsp;
+            <span style="font-family:'Cormorant Garamond',serif;font-size:26px;">${finalPrice} &euro;</span>
+            <span style="background:var(--gold);color:var(--white);font-size:9px;padding:2px 7px;border-radius:10px;letter-spacing:1px;font-weight:700;margin-left:6px;vertical-align:middle;">&minus;${discount}&nbsp;&euro;</span>
+          </div>
+          <div id="countdown" style="font-size:11px;text-align:center;margin-top:8px;color:var(--gold);font-family:'Cormorant Garamond',serif;letter-spacing:1px;">expires in 23:59:42</div>
+          <button onclick="bookBundle()" style="display:block;width:100%;margin-top:10px;padding:10px;background:var(--gold);color:var(--white);border:none;border-radius:6px;font-size:11px;letter-spacing:2px;text-transform:uppercase;font-weight:600;cursor:pointer;">Book the bundle &middot; ${finalPrice} &euro;</button>
+        </div>`;
+      // start countdown if banner appears
+      if (window._countdownTimer) clearInterval(window._countdownTimer);
+    }
+
+    function bookBundle() {
+      const status = document.getElementById('vtoStatus');
+      status.innerHTML = '<span style="color:#2a7d2a;">&#10003; Saved to your basket. Reserved for 24h.</span>';
+    }
+
+    function startCountdown() {
+      if (window._countdownTimer) clearInterval(window._countdownTimer);
+      let total = 24 * 60 * 60 - 18; // arbitrary start: 23:59:42
+      window._countdownTimer = setInterval(() => {
+        total--;
+        if (total <= 0) { clearInterval(window._countdownTimer); return; }
+        const h = String(Math.floor(total / 3600)).padStart(2, '0');
+        const m = String(Math.floor((total % 3600) / 60)).padStart(2, '0');
+        const s = String(total % 60).padStart(2, '0');
+        const el = document.getElementById('countdown');
+        if (el) el.textContent = `expires in ${h}:${m}:${s}`;
+      }, 1000);
+    }
+
+    // ─── Compose two garment images into a side-by-side canvas (returns base64 JPEG) ───
+    async function composeGarmentCanvas(url1, url2) {
+      const loadImg = (src) => new Promise((resolve, reject) => {
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = () => resolve(img);
+        img.onerror = reject;
+        // Route through our same-origin proxy so the canvas is not tainted
+        img.src = `/api/proxy?url=${encodeURIComponent(src)}`;
+      });
+      const [a, b] = await Promise.all([loadImg(url1), loadImg(url2)]);
+      // Normalize each to 512x768 (3:4) then place side-by-side → 1024x768
+      const tileW = 512, tileH = 768;
+      const canvas = document.createElement('canvas');
+      canvas.width = tileW * 2;
+      canvas.height = tileH;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      const drawFit = (img, x) => {
+        const r = Math.min(tileW / img.width, tileH / img.height);
+        const w = img.width * r, h = img.height * r;
+        ctx.drawImage(img, x + (tileW - w) / 2, (tileH - h) / 2, w, h);
+      };
+      drawFit(a, 0);
+      drawFit(b, tileW);
+      return canvas.toDataURL('image/jpeg', 0.9);
+    }
+
+    async function addPairing() {
+      const { base, partner } = window._pairingState || {};
+      if (!base || !partner) return;
+
+      // The single-call multi-garment approach uses the ORIGINAL model + composed garment image.
+      // This is the May 28 BFL release behavior — single VTO call composing both pieces at once.
+      document.getElementById('garmentSlot').innerHTML = `
+        <div style="display:flex;gap:4px;width:100%;height:100%;">
+          <img src="${base.img}" alt="${base.name}" style="width:50%;height:100%;object-fit:cover;border-radius:6px 0 0 6px;">
+          <img src="${partner.img}" alt="${partner.name}" style="width:50%;height:100%;object-fit:cover;border-radius:0 6px 6px 0;">
+        </div>`;
+      document.getElementById('resultSlot').innerHTML = `
+        <div style="display:flex;align-items:center;justify-content:center;height:100%;flex-direction:column;gap:12px;">
+          <div class="spinner"></div>
+          <div style="font-size:13px;color:#888;">Composing both pieces...</div>
+        </div>`;
+      const vtoStatus = document.getElementById('vtoStatus');
+      vtoStatus.textContent = `Composing ${base.name} + ${partner.name}...`;
+
+      try {
+        // Build the multi-garment composite canvas in-browser
+        const garmentComposite = await composeGarmentCanvas(base.img, partner.img);
+
+        const submitResp = await fetch('/api/vto', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            person_url: currentModelUrl,         // original model — VTO composes from scratch
+            garment_b64: garmentComposite,       // 2-up composite of both garments
+            // Server uses the official multi-garment prompt automatically
+          }),
+        });
+        const { job_id } = await submitResp.json();
+
+        const data = await pollJob(job_id, i => {
+          vtoStatus.textContent = `Composing the full look... ${i * 2}s elapsed`;
+        });
+
+        if (data.ok) {
+          document.getElementById('resultSlot').innerHTML = `<img src="${data.local_path}" alt="Full look" style="width:100%;border-radius:8px;box-shadow:0 8px 32px rgba(0,0,0,0.15);">`;
+          vtoStatus.innerHTML = `<span style="color:#2a7d2a;">Full look ready!</span> <strong>${base.name}</strong> + <strong>${partner.name}</strong>.`;
+          document.getElementById('bundleBanner').style.display = 'block';
+          startCountdown();
+        } else {
+          vtoStatus.innerHTML = `<span style="color:#c00;">Failed: ${data.detail?.status || data.error || data.status}</span>`;
+        }
+      } catch (e) {
+        vtoStatus.innerHTML = `<span style="color:#c00;">Compose error: ${e.message}</span>`;
+      }
+    }
+
+    renderPresets();
     renderProducts();
+    selectPreset(0);
   </script>
 </body>
 </html>

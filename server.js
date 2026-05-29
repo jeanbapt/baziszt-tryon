@@ -83,60 +83,111 @@ function jsonResponse(res, data, status = 200) {
   res.end(body);
 }
 
+// In-memory job tracker. Jobs never expire — fine for a demo.
+const jobs = new Map();
+
+async function runJob(jobId, endpoint, payload, filenamePrefix) {
+  try {
+    const resp = await bflRequest(endpoint, payload);
+    console.log(`[${jobId}] submitted: ${resp.id}, polling: ${resp.polling_url}`);
+    const result = await bflPoll(resp.polling_url, 300);
+    console.log(`[${jobId}] status: ${result.status}`);
+    if (result.status === "Ready") {
+      const imageUrl = result.result.sample;
+      const localPath = await downloadImage(imageUrl, `${filenamePrefix}_${Date.now()}.jpg`);
+      jobs.set(jobId, { status: "ready", image_url: imageUrl, local_path: localPath });
+    } else {
+      jobs.set(jobId, { status: "failed", detail: result });
+    }
+  } catch (e) {
+    console.error(`[${jobId}] error:`, e.message);
+    jobs.set(jobId, { status: "failed", error: e.message });
+  }
+}
+
 async function handleGenerate(req, res) {
   const body = await readBody(req);
   console.log(`[generate] ${body.prompt?.slice(0, 80)}...`);
-  try {
-    const resp = await bflRequest("flux-2-klein-9b", {
-      prompt: body.prompt,
-      width: body.width || 832,
-      height: body.height || 1216,
-      safety_tolerance: 2,
-      output_format: "jpeg",
-    });
-    console.log(`[generate] submitted: ${resp.id}, polling: ${resp.polling_url}`);
-    const result = await bflPoll(resp.polling_url);
-    console.log(`[generate] status: ${result.status}`);
-    if (result.status === "Ready") {
-      const imageUrl = result.result.sample;
-      const localPath = await downloadImage(imageUrl, `model_${Date.now()}.jpg`);
-      jsonResponse(res, { ok: true, image_url: imageUrl, local_path: localPath, request_id: resp.id });
-    } else {
-      jsonResponse(res, { ok: false, status: result.status, detail: result }, 422);
-    }
-  } catch (e) {
-    console.error(`[generate] error:`, e.message);
-    jsonResponse(res, { ok: false, error: e.message }, 500);
-  }
+  const jobId = `job_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+  jobs.set(jobId, { status: "pending" });
+  runJob(jobId, "flux-2-klein-9b", {
+    prompt: body.prompt,
+    width: body.width || 832,
+    height: body.height || 1216,
+    safety_tolerance: 2,
+    output_format: "jpeg",
+  }, "model");
+  jsonResponse(res, { ok: true, job_id: jobId });
 }
 
 async function handleVto(req, res) {
   const body = await readBody(req);
-  console.log(`[vto] person=${body.person_url?.slice(0, 60)}...`);
-  try {
-    const resp = await bflRequest("flux-kontext-max", {
-      input_images: [
-        { url: body.person_url },
-        { url: body.garment_url },
-      ],
-      prompt: body.prompt,
-      aspect_ratio: "3:4",
-      output_format: "jpeg",
-    });
-    console.log(`[vto] submitted: ${resp.id}, polling: ${resp.polling_url}`);
-    const result = await bflPoll(resp.polling_url, 180);
-    console.log(`[vto] status: ${result.status}`);
-    if (result.status === "Ready") {
-      const imageUrl = result.result.sample;
-      const localPath = await downloadImage(imageUrl, `vto_${Date.now()}.jpg`);
-      jsonResponse(res, { ok: true, image_url: imageUrl, local_path: localPath, request_id: resp.id });
-    } else {
-      jsonResponse(res, { ok: false, status: result.status, detail: result }, 422);
+  // Both person and garment may come as a URL OR a base64 data URL
+  const person = body.person_b64 || body.person_url;
+  const garment = body.garment_b64 || body.garment_url;
+  const isComposite = !!body.garment_b64;
+  const personIsLocal = !!body.person_b64 || body.person_url?.startsWith("/");
+
+  console.log(`[vto] person=${personIsLocal ? '<base64/local>' : body.person_url?.slice(0, 60) + '...'} garment=${isComposite ? `<composite base64, ${Math.round(garment.length/1024)}KB>` : garment?.slice(0, 60) + '...'}`);
+  const jobId = `job_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+  jobs.set(jobId, { status: "pending" });
+
+  // If person_url is a /results/... local path, read it from disk and convert to base64
+  let personValue = person;
+  if (typeof person === "string" && person.startsWith("/results/")) {
+    try {
+      const buf = await readFile(join(__dirname, person));
+      personValue = `data:image/jpeg;base64,${buf.toString("base64")}`;
+    } catch (e) {
+      jsonResponse(res, { ok: false, error: `local person read failed: ${e.message}` }, 400);
+      return;
     }
-  } catch (e) {
-    console.error(`[vto] error:`, e.message);
-    jsonResponse(res, { ok: false, error: e.message }, 500);
   }
+
+  const payload = {
+    person: personValue,
+    garment,
+    prompt: (body.prompt && body.prompt.trim()) || (isComposite
+      ? "TRY-ON: The person of image 1 wearing the garments of image 2."
+      : "Dress the person in the garment."),
+    output_format: "jpeg",
+  };
+  runJob(jobId, "flux-tools/vto-v1", payload, "vto");
+  jsonResponse(res, { ok: true, job_id: jobId });
+}
+
+async function handleImageProxy(req, res) {
+  const url = new URL(req.url, "http://localhost");
+  const target = url.searchParams.get("url");
+  if (!target) {
+    res.writeHead(400);
+    res.end("missing url");
+    return;
+  }
+  try {
+    const upstream = await fetch(target);
+    const buf = Buffer.from(await upstream.arrayBuffer());
+    res.writeHead(200, {
+      "Content-Type": upstream.headers.get("content-type") || "image/jpeg",
+      "Access-Control-Allow-Origin": "*",
+      "Cache-Control": "public, max-age=3600",
+    });
+    res.end(buf);
+  } catch (e) {
+    res.writeHead(502);
+    res.end("proxy error: " + e.message);
+  }
+}
+
+function handleJobStatus(req, res) {
+  const url = new URL(req.url, "http://localhost");
+  const jobId = url.searchParams.get("id");
+  const job = jobs.get(jobId);
+  if (!job) {
+    jsonResponse(res, { status: "not_found" }, 404);
+    return;
+  }
+  jsonResponse(res, { ok: job.status === "ready", ...job });
 }
 
 async function serveStatic(req, res) {
@@ -156,6 +207,8 @@ async function serveStatic(req, res) {
 const server = createServer(async (req, res) => {
   if (req.method === "POST" && req.url === "/api/generate") return handleGenerate(req, res);
   if (req.method === "POST" && req.url === "/api/vto") return handleVto(req, res);
+  if (req.method === "GET" && req.url.startsWith("/api/job")) return handleJobStatus(req, res);
+  if (req.method === "GET" && req.url.startsWith("/api/proxy")) return handleImageProxy(req, res);
   return serveStatic(req, res);
 });
 
