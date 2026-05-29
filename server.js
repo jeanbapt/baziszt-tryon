@@ -27,21 +27,34 @@ const MIME = {
   ".ico": "image/x-icon",
 };
 
-async function bflRequest(endpoint, payload) {
-  const res = await fetch(`${BFL_API}/${endpoint}`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "X-Key": API_KEY,
-      "accept": "application/json",
-    },
-    body: JSON.stringify(payload),
-  });
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(`BFL ${res.status}: ${text}`);
+async function bflRequest(endpoint, payload, attempt = 0) {
+  const MAX_RETRIES = 3;
+  try {
+    const res = await fetch(`${BFL_API}/${endpoint}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Key": API_KEY,
+        "accept": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(`BFL ${res.status}: ${text}`);
+    }
+    return res.json();
+  } catch (e) {
+    // Retry only on transient network errors, not on BFL 4xx/5xx
+    const isNetworkErr = e.message === "fetch failed" || e.cause?.code === "ECONNRESET" || e.cause?.code === "UND_ERR_SOCKET";
+    if (isNetworkErr && attempt < MAX_RETRIES) {
+      const delay = (attempt + 1) * 1500;
+      console.log(`  [retry] ${endpoint} attempt ${attempt + 1}/${MAX_RETRIES} after ${delay}ms (${e.message})`);
+      await new Promise(r => setTimeout(r, delay));
+      return bflRequest(endpoint, payload, attempt + 1);
+    }
+    throw e;
   }
-  return res.json();
 }
 
 async function bflPoll(pollingUrl, maxWait = 300) {
