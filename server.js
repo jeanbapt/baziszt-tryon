@@ -147,9 +147,10 @@ async function handleVto(req, res) {
   const payload = {
     person: personValue,
     garment,
+    // BFL VTO prompt format: identity preservation + enumerative garment description ending with "of image 2"
     prompt: (body.prompt && body.prompt.trim()) || (isComposite
-      ? "TRY-ON: The person of image 1 wearing the garments of image 2."
-      : "Dress the person in the garment."),
+      ? "The person of image 1, maintaining exactly their face and pose, wearing the garments of image 2."
+      : "The person of image 1, maintaining exactly their face and pose, wearing the garment of image 2."),
     output_format: "jpeg",
   };
   runJob(jobId, "flux-tools/vto-v1", payload, "vto");

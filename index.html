@@ -714,7 +714,7 @@
     // ─── Product grid ───
     // ─── Preset models — diverse cast ───
     const presetModels = [
-      { name: "The Viking",        tag: "50s / Stocky",   img: "/results/model_1780036804122.jpg" },
+      { name: "The Viking",        tag: "50s / Stocky",   img: "/results/preset_viking.jpg" },
       { name: "Slender Med.",      tag: "30s / Lean",     img: "/results/preset_slender_med.jpg" },
       { name: "Afro Rasta",        tag: "40s / Dreads",   img: "/results/preset_afro_rasta.jpg" },
       { name: "Distinguished",     tag: "70s / Elder",    img: "/results/preset_old_man.jpg" },
@@ -880,6 +880,7 @@
           body: JSON.stringify({
             person_url: currentModelUrl,
             garment_url: p.img,
+            prompt: `The person of image 1, maintaining exactly their face and pose, wearing the ${p.desc} of image 2.`,
           }),
         });
         const { job_id } = await submitResp.json();
@@ -974,32 +975,37 @@
       }, 1000);
     }
 
-    // ─── Compose two garment images into a side-by-side canvas (returns base64 JPEG) ───
-    async function composeGarmentCanvas(url1, url2) {
+    // ─── Compose garments into a 2x2 grid canvas (per BFL VTO multi-garment spec) ───
+    // BFL expects up to 4 garments arranged in a 2x2 grid on a plain background.
+    async function composeGarmentCanvas(urls) {
       const loadImg = (src) => new Promise((resolve, reject) => {
         const img = new Image();
         img.crossOrigin = 'anonymous';
         img.onload = () => resolve(img);
         img.onerror = reject;
-        // Route through our same-origin proxy so the canvas is not tainted
         img.src = `/api/proxy?url=${encodeURIComponent(src)}`;
       });
-      const [a, b] = await Promise.all([loadImg(url1), loadImg(url2)]);
-      // Normalize each to 512x768 (3:4) then place side-by-side → 1024x768
-      const tileW = 512, tileH = 768;
+      const list = Array.isArray(urls) ? urls : [urls];
+      const imgs = await Promise.all(list.slice(0, 4).map(loadImg));
+
+      // 2x2 grid, each tile 512x680 (3:4-ish to match packshot aspect), total 1024x1360
+      const tileW = 512, tileH = 680;
       const canvas = document.createElement('canvas');
       canvas.width = tileW * 2;
-      canvas.height = tileH;
+      canvas.height = tileH * 2;
       const ctx = canvas.getContext('2d');
       ctx.fillStyle = '#FFFFFF';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
-      const drawFit = (img, x) => {
-        const r = Math.min(tileW / img.width, tileH / img.height);
+
+      const drawFit = (img, x, y) => {
+        const r = Math.min(tileW / img.width, tileH / img.height) * 0.9;
         const w = img.width * r, h = img.height * r;
-        ctx.drawImage(img, x + (tileW - w) / 2, (tileH - h) / 2, w, h);
+        ctx.drawImage(img, x + (tileW - w) / 2, y + (tileH - h) / 2, w, h);
       };
-      drawFit(a, 0);
-      drawFit(b, tileW);
+      // Slot order: TL=0, TR=1, BL=2, BR=3 (empty slots stay white)
+      const slots = [[0,0], [tileW,0], [0,tileH], [tileW,tileH]];
+      imgs.forEach((img, i) => drawFit(img, slots[i][0], slots[i][1]));
+
       return canvas.toDataURL('image/jpeg', 0.9);
     }
 
@@ -1023,16 +1029,20 @@
       vtoStatus.textContent = `Composing ${base.name} + ${partner.name}...`;
 
       try {
-        // Build the multi-garment composite canvas in-browser
-        const garmentComposite = await composeGarmentCanvas(base.img, partner.img);
+        // Build a 2x2 grid composite of both garments (BFL's recommended multi-garment format)
+        const garmentComposite = await composeGarmentCanvas([base.img, partner.img]);
+
+        // BFL multi-garment prompt format: enumerate each garment by name + key feature,
+        // then "of image 2". Maintain identity from image 1.
+        const multiPrompt = `The person of image 1, maintaining exactly their face and pose, wearing the ${base.desc} and the ${partner.desc} of image 2.`;
 
         const submitResp = await fetch('/api/vto', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            person_url: currentModelUrl,         // original model — VTO composes from scratch
-            garment_b64: garmentComposite,       // 2-up composite of both garments
-            // Server uses the official multi-garment prompt automatically
+            person_url: currentModelUrl,
+            garment_b64: garmentComposite,
+            prompt: multiPrompt,
           }),
         });
         const { job_id } = await submitResp.json();
