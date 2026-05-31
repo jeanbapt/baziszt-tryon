@@ -1,5 +1,3 @@
 .env
 .claude/
-results/*
-# Keep the preset model images shipped with the demo
-!results/preset_*.jpg
+results/

@@ -1,0 +1,8 @@
+results/
+*.jpg
+*.jpeg
+*.png
+*.webp
+.env
+.claude/
+node_modules/
