@@ -28,13 +28,15 @@ const findProduct = name => products.find(p => p.name === name);
 let currentModelUrl = null;
 let selectedGarmentIdx = null;
 
+const PRESETS = 'https://raw.githubusercontent.com/DealExMachina/dexm-virtual-tryon/main/results';
+
 const presetModels = [
-  { name: "The Viking",        tag: "50s / Stocky",   img: "/results/preset_viking.jpg" },
-  { name: "Slender Med.",      tag: "30s / Lean",     img: "/results/preset_slender_med.jpg" },
-  { name: "Afro Rasta",        tag: "40s / Dreads",   img: "/results/preset_afro_rasta.jpg" },
-  { name: "Distinguished",     tag: "70s / Elder",    img: "/results/preset_old_man.jpg" },
-  { name: "Everyman",          tag: "40s / Medium",   img: "/results/preset_medium_age.jpg" },
-  { name: "Young",             tag: "20s / Slim",     img: "/results/preset_young.jpg" },
+  { name: "The Viking",        tag: "50s / Stocky",   img: `${PRESETS}/preset_viking.jpg` },
+  { name: "Slender Med.",      tag: "30s / Lean",     img: `${PRESETS}/preset_slender_med.jpg` },
+  { name: "Afro Rasta",        tag: "40s / Dreads",   img: `${PRESETS}/preset_afro_rasta.jpg` },
+  { name: "Distinguished",     tag: "70s / Elder",    img: `${PRESETS}/preset_old_man.jpg` },
+  { name: "Everyman",          tag: "40s / Medium",   img: `${PRESETS}/preset_medium_age.jpg` },
+  { name: "Young",             tag: "20s / Slim",     img: `${PRESETS}/preset_young.jpg` },
 ];
 
 function renderPresets() {

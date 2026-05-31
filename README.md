@@ -10,7 +10,7 @@ This repo is the **local all-in-one demo** (static UI + Node proxy on one port).
 
 ## What it does
 
-- 6 preset models and a catalog of real Baziszt garments (CDN packshots)
+- 6 preset models (hosted from [dexm-virtual-tryon](https://github.com/DealExMachina/dexm-virtual-tryon)) and Baziszt garment CDN packshots
 - Single-garment try-on via `flux-tools/vto-v1`
 - Multi-garment outfits (shirt + jacket) with server-side composition
 - Async job polling — generations never block the browser
@@ -40,7 +40,9 @@ Requires Node 20+ (`fetch`, `--env-file`).
 
 **Garments:** product photography from [baziszt.com](https://baziszt.com).
 
-All preset model images are AI-generated for demonstration. No real person is depicted without consent.
+All preset model images are AI-generated for demonstration (served from the dexm-virtual-tryon repo). No real person is depicted without consent.
+
+Locally generated try-on outputs land in `results/` (gitignored) — safe to delete anytime.
 
 ## For AI coding agents
 
