@@ -6,12 +6,18 @@ import { fileURLToPath } from "node:url";
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
 const PORT = process.env.PORT || 8090;
 const BFL_API = "https://api.bfl.ai/v1";
+const RUNWAY_API = "https://api.dev.runwayml.com/v1";
 const API_KEY = process.env.BFL_API_KEY;
+const GEN3_API_KEY = process.env.GEN3_API_KEY;
 
 if (!API_KEY) {
   console.error("ERROR: Set BFL_API_KEY in .env");
   console.error("  echo 'BFL_API_KEY=your-key' > .env");
   process.exit(1);
+}
+
+if (!GEN3_API_KEY) {
+  console.warn("WARNING: GEN3_API_KEY not set in .env - animation endpoint disabled");
 }
 
 const MIME = {
@@ -180,6 +186,164 @@ async function handleVto(req, res) {
   jsonResponse(res, { ok: true, job_id: jobId });
 }
 
+async function runwayRequest(endpoint, payload, attempt = 0) {
+  const MAX_RETRIES = 3;
+  try {
+    const res = await fetch(`${RUNWAY_API}/${endpoint}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${GEN3_API_KEY}`,
+        "X-Runway-Version": "2024-11",
+      },
+      body: JSON.stringify(payload),
+    });
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(`Runway ${res.status}: ${text}`);
+    }
+    return res.json();
+  } catch (e) {
+    const isNetworkErr = e.message === "fetch failed" || e.cause?.code === "ECONNRESET" || e.cause?.code === "UND_ERR_SOCKET";
+    if (isNetworkErr && attempt < MAX_RETRIES) {
+      console.log(`[runwayRequest] retry ${attempt + 1}/${MAX_RETRIES}...`);
+      await new Promise(r => setTimeout(r, 1000 * (attempt + 1)));
+      return runwayRequest(endpoint, payload, attempt + 1);
+    }
+    throw e;
+  }
+}
+
+async function runwayPoll(taskId, maxAttempts = 300) {
+  for (let i = 0; i < maxAttempts; i++) {
+    await new Promise(r => setTimeout(r, 2000));
+    try {
+      const res = await fetch(`${RUNWAY_API}/tasks/${taskId}`, {
+        headers: {
+          "Authorization": `Bearer ${GEN3_API_KEY}`,
+          "X-Runway-Version": "2024-11",
+        },
+      });
+      const data = await res.json();
+      if (data.status === "succeeded" || data.status === "completed") {
+        return data;
+      }
+      if (data.status === "failed") {
+        throw new Error(`Task failed: ${data.error || "unknown error"}`);
+      }
+      console.log(`[runway/${taskId}] ${data.status}...`);
+    } catch (e) {
+      if (i < maxAttempts - 1) console.error(`[runway poll] error: ${e.message}, retrying...`);
+      else throw e;
+    }
+  }
+  throw new Error("Runway task polling timeout");
+}
+
+async function handleAnimateSequence(req, res) {
+  if (!GEN3_API_KEY) {
+    jsonResponse(res, { ok: false, error: "GEN3_API_KEY not configured" }, 503);
+    return;
+  }
+
+  const body = await readBody(req);
+  const imageUrl = body.image_url;
+
+  if (!imageUrl) {
+    jsonResponse(res, { ok: false, error: "image_url required" }, 400);
+    return;
+  }
+
+  const animationSequence = [
+    {
+      name: "smile",
+      duration: 5,
+      prompt:
+        "Close-up of model's face, wearing white shirt and leather jacket. Model smiles warmly at camera, eyes engaging, natural expression. Soft studio lighting, white background. High fashion editorial.",
+    },
+    {
+      name: "laugh",
+      duration: 5,
+      prompt:
+        "Close-up of model's face, wearing white shirt and leather jacket. Model laughs joyfully, head tilts slightly, genuine joy. Natural head movement, eyes crinkling. Soft studio lighting.",
+    },
+    {
+      name: "serious",
+      duration: 5,
+      prompt:
+        "Close-up of model's face, wearing white shirt and leather jacket. Model looks directly at camera with serious, intense expression. Sharp jawline, confident gaze. Soft studio lighting.",
+    },
+    {
+      name: "catwalk",
+      duration: 8,
+      prompt:
+        "Full body shot of model wearing white shirt and leather jacket, walking toward camera on white studio backdrop. Model walks confidently, shoulders back. Outfit moves naturally, fabric flows realistically.",
+    },
+    {
+      name: "turn_arms",
+      duration: 7,
+      prompt:
+        "Full body shot of model wearing white shirt and leather jacket. Model walks from left to right, then turns around to face camera. Raises arms slightly, showing jacket movement. Professional fashion runway lighting.",
+    },
+  ];
+
+  const jobId = `anim_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+  jobs.set(jobId, { status: "pending", clips: [] });
+
+  console.log(`[animate/${jobId}] generating ${animationSequence.length} clips from ${imageUrl.slice(0, 60)}...`);
+
+  // Generate all clips in parallel
+  (async () => {
+    try {
+      const clipPromises = animationSequence.map((clip) =>
+        runwayRequest("image_to_video", {
+          model: "gen3",
+          image_url: imageUrl,
+          prompt: clip.prompt,
+          duration: clip.duration,
+          output_format: "mp4",
+        })
+          .then((result) => {
+            console.log(`[animate/${jobId}/${clip.name}] task=${result.id}, polling...`);
+            return runwayPoll(result.id).then((finalData) => ({
+              ...clip,
+              task_id: result.id,
+              video_url: finalData.video?.url,
+              status: finalData.status,
+            }));
+          })
+          .catch((e) => {
+            console.error(`[animate/${jobId}/${clip.name}] error: ${e.message}`);
+            return { ...clip, status: "failed", error: e.message };
+          })
+      );
+
+      const clips = await Promise.all(clipPromises);
+      const allSucceeded = clips.every((c) => c.status !== "failed");
+
+      if (allSucceeded) {
+        const videoUrls = clips.map((c) => c.video_url).filter(Boolean);
+        console.log(`[animate/${jobId}] ✓ all clips ready (${videoUrls.length}/${clips.length})`);
+        jobs.set(jobId, {
+          status: "ready",
+          clips,
+          video_urls: videoUrls,
+          total_duration: animationSequence.reduce((s, c) => s + c.duration, 0),
+        });
+      } else {
+        const failed = clips.filter((c) => c.status === "failed");
+        console.error(`[animate/${jobId}] ✗ ${failed.length} clips failed`);
+        jobs.set(jobId, { status: "failed", clips, error: `${failed.length} clips failed` });
+      }
+    } catch (e) {
+      console.error(`[animate/${jobId}] fatal error: ${e.message}`);
+      jobs.set(jobId, { status: "failed", error: e.message });
+    }
+  })();
+
+  jsonResponse(res, { ok: true, job_id: jobId });
+}
+
 async function handleImageProxy(req, res) {
   const url = new URL(req.url, "http://localhost");
   const target = url.searchParams.get("url");
@@ -231,6 +395,7 @@ async function serveStatic(req, res) {
 const server = createServer(async (req, res) => {
   if (req.method === "POST" && req.url === "/api/generate") return handleGenerate(req, res);
   if (req.method === "POST" && req.url === "/api/vto") return handleVto(req, res);
+  if (req.method === "POST" && req.url === "/api/animate-sequence") return handleAnimateSequence(req, res);
   if (req.method === "GET" && req.url.startsWith("/api/job")) return handleJobStatus(req, res);
   if (req.method === "GET" && req.url.startsWith("/api/proxy")) return handleImageProxy(req, res);
   return serveStatic(req, res);

@@ -4,5 +4,8 @@
   "type": "module",
   "scripts": {
     "start": "node --env-file=.env server.js"
+  },
+  "devDependencies": {
+    "dotenv": "^17.4.2"
   }
 }
